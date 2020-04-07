@@ -28,18 +28,20 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     print('A request for the home page…')
-    return 'Welcome to my Hawaii climate app!'
-    return 'Available routes:'
-    return '/api/v1.0/precipitation'
-    return '/api/v1.0/stations'
-    return '/api/v1.0/tobs'
-    return '/api/v1.0/<start>'
-    return '/api/v1.0/<start>/<end>'
+    return (
+        f'Welcome to my Hawaii climate app!<br/><br/>'
+        f'Available routes:<br/>'
+        f'/api/v1.0/precipitation<br/>'
+        f'/api/v1.0/stations<br/>'
+        f'/api/v1.0/tobs<br/>'
+        f'/api/v1.0/start (YYYY-MM-DD)<br/>'
+        f'/api/v1.0/start/end (YYYY-MM-DD)'
+    )
 
 @app.route('/api/v1.0/precipitation')
 def precip():
     print('A request for the precipitation page…')
-    results = session.querry(Measurement.date, Measurement.prcp).all()
+    results = session.query(Measurement.date, Measurement.prcp).all()
     return jsonify(results)
 
 @app.route('/api/v1.0/stations')
@@ -52,13 +54,9 @@ def stations():
 @app.route('/api/v1.0/tobs')
 def tobs():
     print('A request for the temperature page…')
-
-    station_data = session.query(Measurement.station, func.count(Measurement.station)).\
-        group_by(Measurement.station).\
-            order_by(func.count(Measurement.station).desc()).first()
-
+    
     results = session.query(Measurement.date, Measurement.tobs).\
-    filter(Measurement.station == most_active).all()
+    filter(Measurement.station == 'USC00519281').all()
     return jsonify(results)
 
 @app.route('/api/v1.0/<start>')
@@ -79,7 +77,7 @@ def start_date(start):
     return jsonify(results)
 
 @app.route('/api/v1.0/<start>/<end>')
-def start_date(start, end):
+def start_end_date(start, end):
 
     print('A request for the temperature page with start and end date…')
 
@@ -96,3 +94,6 @@ def start_date(start, end):
     }
     
     return jsonify(results)
+
+if __name__ == "__main__":
+    app.run(debug=True)
